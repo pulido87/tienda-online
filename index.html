@@ -8,10 +8,20 @@
     <meta name="description" content="MercadoCuba - Tu tienda online en Pinar del Río. Alimentos, cervezas, refrescos y más con delivery a domicilio." />
     <meta name="apple-mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
-    <title>MercadoCuba - Tienda Online | Pinar del Río</title>
+    <meta name="apple-mobile-web-app-title" content="MercadoCuba" />
+    <link rel="manifest" href="/manifest.json" />
+    <link rel="apple-touch-icon" href="/icon-192.svg" />
+    <title>MercadoCuba - Tienda Online | Consolación del Sur</title>
   </head>
   <body class="bg-gray-50">
     <div id="root"></div>
     <script type="module" src="/src/main.tsx"></script>
+    <script>
+      if ('serviceWorker' in navigator) {
+        window.addEventListener('load', () => {
+          navigator.serviceWorker.register('/sw.js').catch(() => {});
+        });
+      }
+    </script>
   </body>
 </html>
