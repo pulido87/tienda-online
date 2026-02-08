@@ -528,8 +528,11 @@ export function registerLocalUser(
   password: string,
   role: UserRole
 ): void {
+  const contact = phone.trim() || email.trim();
+  const existingUser = findStoredUserByContact(contact);
+  
   const user: StoredUser = {
-    id: Date.now().toString(),
+    id: existingUser ? existingUser.id : Date.now().toString(),
     name: name.trim(),
     phone: phone.trim(),
     email: email.trim(),

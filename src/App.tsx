@@ -12,6 +12,7 @@ import { AdminView } from './components/AdminView';
 import { ProfileView } from './components/ProfileView';
 import { ProductDetail } from './components/ProductDetail';
 import { ChatBot } from './components/ChatBot';
+import { PWAInstall } from './components/PWAInstall';
 
 function SplashScreen({ onFinish }: { onFinish: () => void }) {
   const [progress, setProgress] = useState(0);
@@ -112,6 +113,7 @@ export default function App() {
       </main>
       <BottomNav />
       <ChatBot />
+      <PWAInstall />
       {selectedProduct && (
         <div className="fixed inset-0 bg-black/50 z-40 flex items-end" onClick={() => setSelectedProduct(null)}>
           <div className="bg-white w-full max-w-lg mx-auto rounded-t-3xl max-h-[85vh] overflow-y-auto" onClick={e => e.stopPropagation()}>
