@@ -1,19 +1,30 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, Suspense, lazy } from 'react';
 import { useStore } from './store';
 import { Header } from './components/Header';
 import { BottomNav } from './components/BottomNav';
 import { HomeView } from './components/HomeView';
-import { CatalogView } from './components/CatalogView';
-import { CartView } from './components/CartView';
-import { CheckoutView } from './components/CheckoutView';
-import { OrdersView } from './components/OrdersView';
-import { AuthView } from './components/AuthView';
-import { AdminView } from './components/AdminView';
-import { ProfileView } from './components/ProfileView';
 import { ProductDetail } from './components/ProductDetail';
 import { ChatBot } from './components/ChatBot';
 import { PWAInstall } from './components/PWAInstall';
 import { ToastContainer } from './components/ToastContainer';
+
+// Lazy load heavy components
+const CatalogView = lazy(() => import('./components/CatalogView').then(m => ({ default: m.CatalogView })));
+const CartView = lazy(() => import('./components/CartView').then(m => ({ default: m.CartView })));
+const CheckoutView = lazy(() => import('./components/CheckoutView').then(m => ({ default: m.CheckoutView })));
+const OrdersView = lazy(() => import('./components/OrdersView').then(m => ({ default: m.OrdersView })));
+const AuthView = lazy(() => import('./components/AuthView').then(m => ({ default: m.AuthView })));
+const AdminView = lazy(() => import('./components/AdminView').then(m => ({ default: m.AdminView })));
+const ProfileView = lazy(() => import('./components/ProfileView').then(m => ({ default: m.ProfileView })));
+
+function LoadingFallback() {
+  return (
+    <div className="flex flex-col items-center justify-center py-20 min-h-[50vh]">
+      <div className="animate-spin text-4xl mb-4 text-emerald-500">🔄</div>
+      <p className="text-gray-500 text-sm animate-pulse">Cargando...</p>
+    </div>
+  );
+}
 
 function SplashScreen({ onFinish }: { onFinish: () => void }) {
   const [progress, setProgress] = useState(0);
@@ -114,7 +125,9 @@ export default function App() {
             <p className="text-gray-500 text-sm animate-pulse">Cargando datos...</p>
           </div>
         ) : (
-          renderView()
+          <Suspense fallback={<LoadingFallback />}>
+            {renderView()}
+          </Suspense>
         )}
       </main>
       <BottomNav />
