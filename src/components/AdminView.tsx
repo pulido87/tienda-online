@@ -25,7 +25,7 @@ export function AdminView() {
         </div>
 
         {/* Tabs */}
-        <div className="flex gap-2 px-4 pb-4 overflow-x-auto scrollbar-hide justify-center">
+        <div className="flex gap-2 px-4 pb-4 overflow-x-auto scrollbar-hide">
           {[
             { id: 'productos', label: 'Productos', icon: Package },
             { id: 'pedidos', label: 'Pedidos', icon: ClipboardList },

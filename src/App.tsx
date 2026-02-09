@@ -18,6 +18,7 @@ import { ToastContainer } from './components/ToastContainer';
 function SplashScreen({ onFinish }: { onFinish: () => void }) {
   const [progress, setProgress] = useState(0);
   const [message, setMessage] = useState('Iniciando...');
+  const [exiting, setExiting] = useState(false);
 
   useEffect(() => {
     const steps = [
@@ -34,14 +35,15 @@ function SplashScreen({ onFinish }: { onFinish: () => void }) {
         i++;
       } else {
         clearInterval(interval);
+        setExiting(true);
         setTimeout(onFinish, 300);
       }
-    }, 400);
+    }, 125);
     return () => clearInterval(interval);
   }, [onFinish]);
 
   return (
-    <div className="fixed inset-0 bg-gray-950 flex flex-col items-center justify-center z-50">
+    <div className={`fixed inset-0 bg-gray-950 flex flex-col items-center justify-center z-50 transition-opacity duration-300 ${exiting ? 'opacity-0' : 'opacity-100'}`}>
       <div className="animate-bounce mb-6 relative">
         <div className="text-7xl relative z-10">🛒</div>
         <div className="absolute inset-0 bg-emerald-500/20 blur-xl rounded-full"></div>

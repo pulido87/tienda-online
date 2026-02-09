@@ -141,6 +141,36 @@ export const DEFAULT_PAYMENT_INFOS: PaymentInfo[] = [
 const USERS_KEY = 'mc_users_db';
 const SESSION_KEY = 'mc_active_session';
 const PAYMENTS_KEY = 'mc_payments_config';
+const PRODUCTS_KEY = 'mc_products_data';
+const ORDERS_KEY = 'mc_orders_data';
+
+function getStoredProducts(): Product[] | null {
+  try {
+    const raw = localStorage.getItem(PRODUCTS_KEY);
+    if (!raw) return null;
+    return JSON.parse(raw);
+  } catch {
+    return null;
+  }
+}
+
+function saveStoredProducts(products: Product[]): void {
+  localStorage.setItem(PRODUCTS_KEY, JSON.stringify(products));
+}
+
+function getStoredOrders(): Order[] | null {
+  try {
+    const raw = localStorage.getItem(ORDERS_KEY);
+    if (!raw) return null;
+    return JSON.parse(raw);
+  } catch {
+    return null;
+  }
+}
+
+function saveStoredOrders(orders: Order[]): void {
+  localStorage.setItem(ORDERS_KEY, JSON.stringify(orders));
+}
 
 function getStoredPayments(): PaymentInfo[] {
   try {
@@ -376,23 +406,38 @@ export const useStore = create<AppState>((set, get) => ({
   },
 
   // ===== PRODUCTS =====
-  products: FALLBACK_PRODUCTS,
-  setProducts: (p) => set({ products: p }),
+  products: getStoredProducts() || FALLBACK_PRODUCTS,
+  setProducts: (p) => {
+    set({ products: p });
+    saveStoredProducts(p);
+  },
 
   addProduct: async (p) => {
-    set((s) => ({ products: [...s.products, p] }));
+    set((s) => {
+      const next = [...s.products, p];
+      saveStoredProducts(next);
+      return { products: next };
+    });
     if (isSupabaseConfigured) {
       const dbData = productToDb(p);
       const { data, error } = await db.createProduct(dbData);
       if (!error && data) {
         const newProduct = dbToProduct(data);
-        set((s) => ({ products: s.products.map(prod => prod.id === p.id ? newProduct : prod) }));
+        set((s) => {
+          const next = s.products.map(prod => prod.id === p.id ? newProduct : prod);
+          saveStoredProducts(next);
+          return { products: next };
+        });
       }
     }
   },
 
   updateProduct: async (id, data) => {
-    set((s) => ({ products: s.products.map((p) => p.id === id ? { ...p, ...data } : p) }));
+    set((s) => {
+      const next = s.products.map((p) => p.id === id ? { ...p, ...data } : p);
+      saveStoredProducts(next);
+      return { products: next };
+    });
     if (isSupabaseConfigured) {
       const dbData = productToDb(data);
       await db.updateProduct(id, dbData);
@@ -400,7 +445,11 @@ export const useStore = create<AppState>((set, get) => ({
   },
 
   deleteProduct: async (id) => {
-    set((s) => ({ products: s.products.filter((p) => p.id !== id) }));
+    set((s) => {
+      const next = s.products.filter((p) => p.id !== id);
+      saveStoredProducts(next);
+      return { products: next };
+    });
     if (isSupabaseConfigured) {
       await db.deleteProduct(id);
     }
@@ -429,10 +478,14 @@ export const useStore = create<AppState>((set, get) => ({
   cartCount: () => get().cart.reduce((t, i) => t + i.quantity, 0),
 
   // ===== ORDERS =====
-  orders: [],
+  orders: getStoredOrders() || [],
 
   addOrder: async (o) => {
-    set((s) => ({ orders: [o, ...s.orders] }));
+    set((s) => {
+      const next = [o, ...s.orders];
+      saveStoredOrders(next);
+      return { orders: next };
+    });
     if (isSupabaseConfigured) {
       const orderDb = {
         order_number: o.orderNumber,
@@ -465,14 +518,22 @@ export const useStore = create<AppState>((set, get) => ({
   },
 
   updateOrderStatus: async (id, status) => {
-    set((s) => ({ orders: s.orders.map((o) => o.id === id ? { ...o, status } : o) }));
+    set((s) => {
+      const next = s.orders.map((o) => o.id === id ? { ...o, status } : o);
+      saveStoredOrders(next);
+      return { orders: next };
+    });
     if (isSupabaseConfigured) {
       await db.updateOrderStatus(id, status);
     }
   },
 
   verifyPayment: async (id) => {
-    set((s) => ({ orders: s.orders.map((o) => o.id === id ? { ...o, paymentVerified: true } : o) }));
+    set((s) => {
+      const next = s.orders.map((o) => o.id === id ? { ...o, paymentVerified: true } : o);
+      saveStoredOrders(next);
+      return { orders: next };
+    });
     if (isSupabaseConfigured) {
       await db.verifyPayment(id);
     }
@@ -532,28 +593,30 @@ export const useStore = create<AppState>((set, get) => ({
         return;
       }
 
-      // Load products
-      const { data: productsData } = await db.getProducts();
-      if (productsData && productsData.length > 0) {
-        set({ products: productsData.map(dbToProduct) });
+      // Parallel fetch
+      const [productsRes, ordersRes, sessionRes] = await Promise.all([
+        db.getProducts(),
+        db.getOrders(),
+        db.getSession()
+      ]);
+
+      // Handle Products
+      if (productsRes.data && productsRes.data.length > 0) {
+        const mapped = productsRes.data.map(dbToProduct);
+        set({ products: mapped });
+        saveStoredProducts(mapped);
       }
 
-      // Load orders
-      const { data: ordersData } = await db.getOrders();
-      if (ordersData && ordersData.length > 0) {
-        set({ orders: ordersData.map(dbToOrder) });
+      // Handle Orders
+      if (ordersRes.data && ordersRes.data.length > 0) {
+        const mapped = ordersRes.data.map(dbToOrder);
+        set({ orders: mapped });
+        saveStoredOrders(mapped);
       }
 
-      // Load delivery zones
-      // const { data: zonesData } = await db.getDeliveryZones();
-      // if (zonesData && zonesData.length > 0) {
-      //   set({ deliveryZones: zonesData.map(dbToZone) });
-      // }
-
-      // Check existing Supabase session
-      const { data: sessionData } = await db.getSession();
-      if (sessionData?.session?.user) {
-        const userId = sessionData.session.user.id;
+      // Handle Session
+      if (sessionRes.data?.session?.user) {
+        const userId = sessionRes.data.session.user.id;
         const { data: profile } = await db.getProfile(userId);
         if (profile) {
           const user: User = {
@@ -572,13 +635,21 @@ export const useStore = create<AppState>((set, get) => ({
       // Real-time subscriptions
       db.subscribeToProducts(() => {
         db.getProducts().then(({ data }) => {
-          if (data) set({ products: data.map(dbToProduct) });
+          if (data) {
+            const mapped = data.map(dbToProduct);
+            set({ products: mapped });
+            saveStoredProducts(mapped);
+          }
         });
       });
 
       db.subscribeToOrders(() => {
         db.getOrders().then(({ data }) => {
-          if (data) set({ orders: data.map(dbToOrder) });
+          if (data) {
+            const mapped = data.map(dbToOrder);
+            set({ orders: mapped });
+            saveStoredOrders(mapped);
+          }
         });
       });
 
