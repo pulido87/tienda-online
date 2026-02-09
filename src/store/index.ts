@@ -9,6 +9,23 @@ export type OrderStatus = 'pending' | 'confirmed' | 'preparing' | 'on_the_way' |
 export type UserRole = 'admin' | 'vendor' | 'delivery' | 'client';
 export type View = 'home' | 'catalog' | 'cart' | 'orders' | 'profile' | 'admin' | 'checkout';
 
+export interface PaymentInfo {
+  id: string;
+  type: PaymentMethod;
+  name: string;
+  accountNumber?: string;
+  beneficiary?: string;
+  phone?: string;
+  instructions?: string;
+  icon?: string;
+}
+
+export interface Toast {
+  id: string;
+  message: string;
+  type: 'success' | 'error' | 'info';
+}
+
 export interface Product {
   id: string; name: string; description: string; category: Category;
   priceCUP: number; priceMLC: number; unit: string; stock: number;
@@ -79,31 +96,65 @@ export const COMBOS: Combo[] = [
 ];
 
 export const DELIVERY_ZONES: DeliveryZone[] = [
+  // Zonas Urbanas y Cercanas
   { id: 'z1', name: 'Consolación del Sur (Centro)', feeCUP: 100, feeMLC: 0.35, estimatedTime: '15-25 min' },
   { id: 'z2', name: 'Pueblo Nuevo', feeCUP: 100, feeMLC: 0.35, estimatedTime: '15-25 min' },
-  { id: 'z3', name: 'La Leña', feeCUP: 150, feeMLC: 0.50, estimatedTime: '20-35 min' },
-  { id: 'z4', name: 'Puerta de Golpe', feeCUP: 200, feeMLC: 0.70, estimatedTime: '25-40 min' },
-  { id: 'z5', name: 'Alonso de Rojas', feeCUP: 250, feeMLC: 0.85, estimatedTime: '30-45 min' },
-  { id: 'z6', name: 'Pilotos', feeCUP: 250, feeMLC: 0.85, estimatedTime: '30-45 min' },
-  { id: 'z7', name: 'Herradura', feeCUP: 300, feeMLC: 1.00, estimatedTime: '35-50 min' },
-  { id: 'z8', name: 'Ceja del Río', feeCUP: 200, feeMLC: 0.70, estimatedTime: '25-40 min' },
-  { id: 'z9', name: 'Santa Clara', feeCUP: 200, feeMLC: 0.70, estimatedTime: '25-40 min' },
-  { id: 'z10', name: 'El Naranjo', feeCUP: 250, feeMLC: 0.85, estimatedTime: '30-45 min' },
-  { id: 'z11', name: 'Entronque de Herradura', feeCUP: 300, feeMLC: 1.00, estimatedTime: '35-50 min' },
-  { id: 'z12', name: 'La Palma', feeCUP: 300, feeMLC: 1.00, estimatedTime: '35-50 min' },
-  { id: 'z13', name: 'Loma de la Güira', feeCUP: 350, feeMLC: 1.20, estimatedTime: '40-55 min' },
-  { id: 'z14', name: 'San Andrés', feeCUP: 250, feeMLC: 0.85, estimatedTime: '30-45 min' },
-  { id: 'z15', name: 'Río Hondo', feeCUP: 300, feeMLC: 1.00, estimatedTime: '35-50 min' },
-  { id: 'z16', name: 'Quiñones', feeCUP: 200, feeMLC: 0.70, estimatedTime: '25-40 min' },
-  { id: 'z17', name: 'Sabana de Cantero', feeCUP: 350, feeMLC: 1.20, estimatedTime: '40-55 min' },
-  { id: 'z18', name: 'Los Palacios', feeCUP: 400, feeMLC: 1.35, estimatedTime: '45-60 min' },
-  { id: 'z19', name: 'San Diego de los Baños', feeCUP: 450, feeMLC: 1.50, estimatedTime: '50-65 min' },
-  { id: 'z20', name: 'Viñales', feeCUP: 500, feeMLC: 1.70, estimatedTime: '55-70 min' },
+  { id: 'z3', name: 'Cayo Largo', feeCUP: 120, feeMLC: 0.40, estimatedTime: '20-30 min' },
+  { id: 'z4', name: 'Villa I y II', feeCUP: 100, feeMLC: 0.35, estimatedTime: '15-25 min' },
+  
+  // Zonas a Media Distancia
+  { id: 'z5', name: 'Entronque de Herradura', feeCUP: 150, feeMLC: 0.50, estimatedTime: '25-40 min' },
+  { id: 'z6', name: 'Herradura', feeCUP: 200, feeMLC: 0.70, estimatedTime: '30-45 min' },
+  { id: 'z7', name: 'Puerta de Golpe', feeCUP: 200, feeMLC: 0.70, estimatedTime: '30-45 min' },
+  { id: 'z8', name: 'Río Hondo', feeCUP: 250, feeMLC: 0.85, estimatedTime: '35-50 min' },
+  { id: 'z9', name: 'Pilotos', feeCUP: 250, feeMLC: 0.85, estimatedTime: '35-50 min' },
+  { id: 'z10', name: 'Entronque de Pilotos', feeCUP: 200, feeMLC: 0.70, estimatedTime: '30-45 min' },
+  { id: 'z11', name: 'El Canal', feeCUP: 180, feeMLC: 0.60, estimatedTime: '25-40 min' },
+  { id: 'z12', name: 'Santa Clara', feeCUP: 150, feeMLC: 0.50, estimatedTime: '20-35 min' },
+  { id: 'z13', name: 'Jagua', feeCUP: 150, feeMLC: 0.50, estimatedTime: '20-35 min' },
+  { id: 'z14', name: 'San Pablo', feeCUP: 150, feeMLC: 0.50, estimatedTime: '20-35 min' },
+
+  // Zonas Lejanas
+  { id: 'z15', name: 'Alonso de Rojas', feeCUP: 350, feeMLC: 1.20, estimatedTime: '45-60 min' },
+  { id: 'z16', name: 'San Diego de los Baños', feeCUP: 450, feeMLC: 1.50, estimatedTime: '50-65 min' },
+  { id: 'z17', name: 'La Leña', feeCUP: 300, feeMLC: 1.00, estimatedTime: '40-55 min' },
+  { id: 'z18', name: 'Colmenar', feeCUP: 280, feeMLC: 0.95, estimatedTime: '35-50 min' },
+  { id: 'z19', name: 'Lajas', feeCUP: 300, feeMLC: 1.00, estimatedTime: '40-55 min' },
+  { id: 'z20', name: 'Legua', feeCUP: 350, feeMLC: 1.20, estimatedTime: '45-60 min' },
+  { id: 'z21', name: 'Arroyo Colorado', feeCUP: 300, feeMLC: 1.00, estimatedTime: '40-55 min' },
+  { id: 'z22', name: 'Crucero de Echevarría', feeCUP: 250, feeMLC: 0.85, estimatedTime: '35-50 min' },
+  { id: 'z23', name: 'Ceja de Herradura', feeCUP: 280, feeMLC: 0.95, estimatedTime: '40-55 min' },
+  { id: 'z24', name: 'Palenque', feeCUP: 300, feeMLC: 1.00, estimatedTime: '40-55 min' },
+  { id: 'z25', name: 'Ruiz', feeCUP: 350, feeMLC: 1.20, estimatedTime: '45-60 min' },
+  { id: 'z26', name: 'Soledad', feeCUP: 350, feeMLC: 1.20, estimatedTime: '45-60 min' },
+  { id: 'z27', name: 'Arroyo de Agua', feeCUP: 250, feeMLC: 0.85, estimatedTime: '35-50 min' },
+];
+
+export const DEFAULT_PAYMENT_INFOS: PaymentInfo[] = [
+  { id: 'p1', type: 'transfermovil', name: 'Transfermóvil', phone: '51234567', instructions: 'Pagar a este número', icon: '📱' },
+  { id: 'p2', type: 'enzona', name: 'EnZona', accountNumber: '9225 1234 5678 9000', beneficiary: 'MercadoCuba', icon: '💳' },
+  { id: 'p3', type: 'transfer', name: 'Transferencia Bancaria', accountNumber: '9200 0000 0000 0000', beneficiary: 'MercadoCuba SRL', icon: '🏦' },
+  { id: 'p4', type: 'cash', name: 'Efectivo', instructions: 'Pago contra entrega', icon: '💵' },
 ];
 
 // ==================== LOCAL STORAGE HELPERS ====================
 const USERS_KEY = 'mc_users_db';
 const SESSION_KEY = 'mc_active_session';
+const PAYMENTS_KEY = 'mc_payments_config';
+
+function getStoredPayments(): PaymentInfo[] {
+  try {
+    const raw = localStorage.getItem(PAYMENTS_KEY);
+    if (!raw) return DEFAULT_PAYMENT_INFOS;
+    return JSON.parse(raw);
+  } catch {
+    return DEFAULT_PAYMENT_INFOS;
+  }
+}
+
+function saveStoredPayments(payments: PaymentInfo[]): void {
+  localStorage.setItem(PAYMENTS_KEY, JSON.stringify(payments));
+}
 
 interface StoredUser {
   id: string;
@@ -286,6 +337,12 @@ interface AppState {
   selectedProduct: Product | null;
   setSelectedProduct: (p: Product | null) => void;
   isLoading: boolean;
+  paymentInfos: PaymentInfo[];
+  addPaymentInfo: (info: PaymentInfo) => void;
+  deletePaymentInfo: (id: string) => void;
+  toasts: Toast[];
+  addToast: (msg: string, type?: 'success' | 'error' | 'info') => void;
+  removeToast: (id: string) => void;
 }
 
 export const useStore = create<AppState>((set, get) => ({
@@ -293,6 +350,30 @@ export const useStore = create<AppState>((set, get) => ({
   setView: (v) => set({ currentView: v }),
   currency: 'CUP',
   toggleCurrency: () => set((s) => ({ currency: s.currency === 'CUP' ? 'MLC' : 'CUP' })),
+
+  // ===== TOASTS =====
+  toasts: [],
+  addToast: (msg, type = 'success') => {
+    const id = Date.now().toString();
+    set((s) => ({ toasts: [...s.toasts, { id, message: msg, type }] }));
+    setTimeout(() => {
+      set((s) => ({ toasts: s.toasts.filter((t) => t.id !== id) }));
+    }, 3000);
+  },
+  removeToast: (id) => set((s) => ({ toasts: s.toasts.filter((t) => t.id !== id) })),
+
+  // ===== PAYMENTS =====
+  paymentInfos: getStoredPayments(),
+  addPaymentInfo: (info) => {
+    const newPayments = [...get().paymentInfos, info];
+    set({ paymentInfos: newPayments });
+    saveStoredPayments(newPayments);
+  },
+  deletePaymentInfo: (id) => {
+    const newPayments = get().paymentInfos.filter(p => p.id !== id);
+    set({ paymentInfos: newPayments });
+    saveStoredPayments(newPayments);
+  },
 
   // ===== PRODUCTS =====
   products: FALLBACK_PRODUCTS,
@@ -464,10 +545,10 @@ export const useStore = create<AppState>((set, get) => ({
       }
 
       // Load delivery zones
-      const { data: zonesData } = await db.getDeliveryZones();
-      if (zonesData && zonesData.length > 0) {
-        set({ deliveryZones: zonesData.map(dbToZone) });
-      }
+      // const { data: zonesData } = await db.getDeliveryZones();
+      // if (zonesData && zonesData.length > 0) {
+      //   set({ deliveryZones: zonesData.map(dbToZone) });
+      // }
 
       // Check existing Supabase session
       const { data: sessionData } = await db.getSession();

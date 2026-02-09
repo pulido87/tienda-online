@@ -48,19 +48,19 @@ export function PWAInstall() {
 
   return (
     <div className="fixed bottom-20 left-4 right-4 max-w-lg mx-auto z-50 animate-slideUp">
-      <div className="bg-green-600 text-white rounded-2xl p-4 shadow-2xl flex items-center gap-3">
-        <div className="text-3xl">📲</div>
+      <div className="bg-gray-900/90 backdrop-blur-xl border border-gray-800 text-gray-100 rounded-2xl p-4 shadow-2xl shadow-black/50 flex items-center gap-3">
+        <div className="text-3xl bg-gray-800 w-12 h-12 rounded-xl flex items-center justify-center">📲</div>
         <div className="flex-1">
-          <p className="font-bold text-sm">Instala MercadoCuba</p>
-          <p className="text-green-200 text-xs">Accede mas rapido desde tu pantalla</p>
+          <p className="font-bold text-sm text-gray-100">Instala MercadoCuba</p>
+          <p className="text-gray-400 text-xs">Accede más rápido desde tu pantalla</p>
         </div>
         <button
           onClick={handleInstall}
-          className="bg-white text-green-700 px-4 py-2 rounded-xl text-sm font-bold flex items-center gap-1 active:scale-95 transition-transform"
+          className="bg-emerald-600 text-white px-4 py-2 rounded-xl text-sm font-bold flex items-center gap-1 active:scale-95 transition-transform hover:bg-emerald-500 shadow-lg shadow-emerald-900/20"
         >
           <Download size={16} /> Instalar
         </button>
-        <button onClick={handleDismiss} className="p-1 text-green-200">
+        <button onClick={handleDismiss} className="p-2 text-gray-400 hover:text-white hover:bg-gray-800 rounded-full transition-colors">
           <X size={18} />
         </button>
       </div>

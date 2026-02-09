@@ -178,7 +178,7 @@ export function ChatBot() {
   const [messages, setMessages] = useState<Message[]>([
     {
       id: 1, sender: 'bot',
-      text: 'Hola! 👋 Soy tu asistente de voz de MercadoCuba. Pulsa el microfono para hablarme.',
+      text: '¡Hola! 👋 Soy tu asistente de MercadoCuba. Pulsa el micrófono para hablar.',
       buttons: QUICK_ACTIONS.map(a => ({ label: a.label, action: a.action })),
     },
   ]);
@@ -285,28 +285,27 @@ export function ChatBot() {
     return (
       <button
         onClick={openChat}
-        className="fixed bottom-20 right-4 w-14 h-14 bg-blue-600 text-white rounded-full shadow-lg flex items-center justify-center z-40 active:scale-90 transition-transform hover:bg-blue-700 animate-bounce-slow"
-        style={{ boxShadow: '0 4px 20px rgba(37,99,235,0.5)' }}
+        className="fixed bottom-20 right-4 w-14 h-14 bg-emerald-600 text-white rounded-full shadow-lg shadow-emerald-900/50 flex items-center justify-center z-40 active:scale-90 transition-transform hover:bg-emerald-500 animate-bounce-slow"
       >
         <Mic size={26} />
-        <span className="absolute -top-1 -right-1 bg-green-500 w-3 h-3 rounded-full animate-pulse border-2 border-white"></span>
+        <span className="absolute -top-1 -right-1 bg-red-500 w-3 h-3 rounded-full animate-pulse border-2 border-gray-900"></span>
       </button>
     );
   }
 
   return (
-    <div className="fixed inset-0 z-50 flex flex-col max-w-lg mx-auto" style={{ background: '#f0f2f5' }}>
+    <div className="fixed inset-0 z-50 flex flex-col max-w-lg mx-auto bg-gray-950/95 backdrop-blur-sm">
       {/* Header */}
-      <div className="bg-blue-600 text-white px-4 py-3 flex items-center justify-between shadow-md">
+      <div className="bg-gray-900/80 backdrop-blur-md border-b border-gray-800 text-white px-4 py-3 flex items-center justify-between shadow-lg">
         <div className="flex items-center gap-3">
-          <div className={`w-10 h-10 rounded-full flex items-center justify-center text-lg transition-all ${isListening ? 'bg-red-500 animate-pulse' : 'bg-white/20'}`}>
+          <div className={`w-10 h-10 rounded-full flex items-center justify-center text-lg transition-all ${isListening ? 'bg-red-500/20 text-red-400 animate-pulse border border-red-500/50' : 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20'}`}>
             {isListening ? <Mic size={20} /> : '🤖'}
           </div>
           <div>
-            <h3 className="font-bold text-sm">Asistente de Voz</h3>
-            <p className="text-blue-200 text-[10px] flex items-center gap-1">
-              <span className={`w-2 h-2 rounded-full inline-block ${isListening ? 'bg-red-400' : 'bg-green-400'}`}></span>
-              {isListening ? 'Escuchando...' : 'En linea'}
+            <h3 className="font-bold text-sm text-gray-100">Asistente IA</h3>
+            <p className="text-gray-400 text-[10px] flex items-center gap-1">
+              <span className={`w-2 h-2 rounded-full inline-block ${isListening ? 'bg-red-500' : 'bg-emerald-500'}`}></span>
+              {isListening ? 'Escuchando...' : 'En línea'}
             </p>
           </div>
         </div>
@@ -317,7 +316,7 @@ export function ChatBot() {
               setIsMuted(newMuted);
               if (newMuted) window.speechSynthesis.cancel();
             }} 
-            className="p-2 hover:bg-white/10 rounded-full"
+            className="p-2 hover:bg-gray-800 rounded-full text-gray-400 hover:text-white transition-colors"
             title={isMuted ? "Activar voz" : "Silenciar"}
           >
             {isMuted ? <VolumeX size={20} /> : <Volume2 size={20} />}
@@ -329,7 +328,7 @@ export function ChatBot() {
               recognitionRef.current?.stop();
               setIsListening(false);
             }} 
-            className="p-2 hover:bg-white/10 rounded-full"
+            className="p-2 hover:bg-gray-800 rounded-full text-gray-400 hover:text-white transition-colors"
           >
             <X size={20} />
           </button>
@@ -337,13 +336,13 @@ export function ChatBot() {
       </div>
 
       {/* Messages */}
-      <div className="flex-1 overflow-y-auto p-4 space-y-3 bg-gray-50">
+      <div className="flex-1 overflow-y-auto p-4 space-y-3 bg-gray-950">
         {messages.map(msg => (
           <div key={msg.id} className={`flex ${msg.sender === 'user' ? 'justify-end' : 'justify-start'}`}>
-            <div className={`max-w-[85%] rounded-2xl px-4 py-3 shadow-sm ${
+            <div className={`max-w-[85%] rounded-2xl px-4 py-3 shadow-md ${
               msg.sender === 'user'
-                ? 'bg-blue-600 text-white rounded-br-none'
-                : 'bg-white text-gray-800 rounded-bl-none border border-gray-100'
+                ? 'bg-emerald-600 text-white rounded-br-none shadow-emerald-900/20'
+                : 'bg-gray-800 text-gray-200 rounded-bl-none border border-gray-700 shadow-black/20'
             }`}>
               <p className="text-sm whitespace-pre-line leading-relaxed">{msg.text}</p>
               {msg.buttons && msg.buttons.length > 0 && (
@@ -352,7 +351,7 @@ export function ChatBot() {
                     <button
                       key={i}
                       onClick={() => handleButtonClick(btn.action)}
-                      className="w-full text-left bg-blue-50 hover:bg-blue-100 text-blue-700 px-3 py-2 rounded-xl text-xs font-medium flex items-center justify-between transition-colors border border-blue-100"
+                      className="w-full text-left bg-gray-700/50 hover:bg-gray-700 text-emerald-400 px-3 py-2 rounded-xl text-xs font-medium flex items-center justify-between transition-colors border border-gray-600/50 hover:border-emerald-500/30"
                     >
                       {btn.label}
                       <ChevronRight size={14} />
@@ -366,11 +365,11 @@ export function ChatBot() {
 
         {typing && (
           <div className="flex justify-start">
-            <div className="bg-white rounded-2xl rounded-bl-none px-4 py-3 shadow-sm border border-gray-100">
+            <div className="bg-gray-800 rounded-2xl rounded-bl-none px-4 py-3 shadow-sm border border-gray-700">
               <div className="flex items-center gap-1 h-5">
-                <span className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '0ms' }}></span>
-                <span className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '150ms' }}></span>
-                <span className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '300ms' }}></span>
+                <span className="w-2 h-2 bg-gray-500 rounded-full animate-bounce" style={{ animationDelay: '0ms' }}></span>
+                <span className="w-2 h-2 bg-gray-500 rounded-full animate-bounce" style={{ animationDelay: '150ms' }}></span>
+                <span className="w-2 h-2 bg-gray-500 rounded-full animate-bounce" style={{ animationDelay: '300ms' }}></span>
               </div>
             </div>
           </div>
@@ -379,21 +378,14 @@ export function ChatBot() {
         <div ref={messagesEndRef} />
       </div>
 
-      {/* Quick Actions */}
-      {!typing && messages.length > 0 && messages[messages.length - 1].sender === 'bot' && (
-        <div className="px-4 pb-2 bg-gray-50">
-           {/* Only show if not scrolling too much, logic handled via css scroll usually but here simple list */}
-        </div>
-      )}
-
       {/* Input Area */}
-      <div className="bg-white border-t px-3 py-3 flex items-center gap-2">
+      <div className="bg-gray-900 border-t border-gray-800 px-3 py-3 flex items-center gap-2">
         <button
           onClick={toggleListening}
-          className={`p-3 rounded-full transition-all duration-300 shadow-sm ${
+          className={`p-3 rounded-full transition-all duration-300 shadow-lg ${
             isListening 
-              ? 'bg-red-500 text-white animate-pulse shadow-red-200' 
-              : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+              ? 'bg-red-500 text-white animate-pulse shadow-red-500/30' 
+              : 'bg-gray-800 text-gray-400 hover:bg-gray-700 hover:text-emerald-400'
           }`}
           title="Presiona para hablar"
         >
@@ -407,7 +399,7 @@ export function ChatBot() {
             onChange={e => setInput(e.target.value)}
             onKeyDown={e => { if (e.key === 'Enter') sendMessage(input); }}
             placeholder={isListening ? "Escuchando..." : "Escribe o habla..."}
-            className="w-full bg-gray-100 rounded-full pl-4 pr-10 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all"
+            className="w-full bg-gray-950 border border-gray-800 rounded-full pl-4 pr-10 py-2.5 text-sm text-gray-100 placeholder-gray-500 focus:outline-none focus:border-emerald-500/50 focus:ring-1 focus:ring-emerald-500/50 transition-all"
             disabled={isListening}
           />
         </div>
@@ -416,8 +408,10 @@ export function ChatBot() {
           <button
             onClick={() => sendMessage(input)}
             disabled={!input.trim()}
-            className={`p-2.5 rounded-full transition-colors flex-shrink-0 ${
-              input.trim() ? 'bg-blue-600 text-white shadow-md hover:bg-blue-700' : 'bg-gray-200 text-gray-400'
+            className={`p-2.5 rounded-full transition-all flex-shrink-0 ${
+              input.trim() 
+                ? 'bg-emerald-600 text-white shadow-lg shadow-emerald-900/30 hover:bg-emerald-500' 
+                : 'bg-gray-800 text-gray-600'
             }`}
           >
             <Send size={18} />
