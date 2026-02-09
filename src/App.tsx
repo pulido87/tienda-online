@@ -36,9 +36,9 @@ function SplashScreen({ onFinish }: { onFinish: () => void }) {
       } else {
         clearInterval(interval);
         setExiting(true);
-        setTimeout(onFinish, 300);
+        setTimeout(onFinish, 200);
       }
-    }, 125);
+    }, 200);
     return () => clearInterval(interval);
   }, [onFinish]);
 
@@ -50,7 +50,7 @@ function SplashScreen({ onFinish }: { onFinish: () => void }) {
       </div>
       <h1 className="text-3xl font-bold text-white mb-1 tracking-tight">Mercado<span className="text-emerald-500">Cuba</span></h1>
       <p className="text-gray-400 text-sm mb-1">Tu tienda online • Pinar del Río</p>
-      <p className="text-gray-600 text-[10px] mb-8">Desarrollado por Yosmani Pulido</p>
+      <p className="text-gray-400 text-base font-medium mb-8">Desarrollado por Yosmani Pulido</p>
       <div className="w-48 h-1.5 bg-gray-800 rounded-full overflow-hidden mb-3 border border-gray-800">
         <div className="h-full bg-emerald-500 rounded-full transition-all duration-500 shadow-[0_0_10px_rgba(16,185,129,0.5)]" style={{ width: `${progress}%` }} />
       </div>
