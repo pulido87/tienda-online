@@ -585,40 +585,42 @@ export const useStore = create<AppState>((set, get) => ({
     set({ isLoading: true });
 
     try {
-      const connTest = await db.testConnection();
-      set({ supabaseConnected: connTest.success });
+      // 1. Carga inicial crítica en paralelo (Sesión y Productos)
+      // Eliminamos testConnection para ahorrar una petición
+      const [productsRes, sessionRes] = await Promise.all([
+        db.getProducts(),
+        db.getSession()
+      ]);
 
-      if (!connTest.success) {
+      // Verificar conexión basado en si hubo error de red
+      const isConnected = !productsRes.error;
+      set({ supabaseConnected: isConnected });
+
+      if (!isConnected) {
+        console.error('Error conectando a Supabase:', productsRes.error);
         set({ isLoading: false });
         return;
       }
 
-      // Parallel fetch
-      const [productsRes, ordersRes, sessionRes] = await Promise.all([
-        db.getProducts(),
-        db.getOrders(),
-        db.getSession()
-      ]);
-
-      // Handle Products
+      // 2. Procesar Productos inmediatamente
       if (productsRes.data && productsRes.data.length > 0) {
         const mapped = productsRes.data.map(dbToProduct);
         set({ products: mapped });
         saveStoredProducts(mapped);
       }
 
-      // Handle Orders
-      if (ordersRes.data && ordersRes.data.length > 0) {
-        const mapped = ordersRes.data.map(dbToOrder);
-        set({ orders: mapped });
-        saveStoredOrders(mapped);
-      }
-
-      // Handle Session
+      // 3. Procesar Sesión y Cargar datos de usuario (Perfil y Pedidos)
       if (sessionRes.data?.session?.user) {
         const userId = sessionRes.data.session.user.id;
-        const { data: profile } = await db.getProfile(userId);
-        if (profile) {
+        
+        // Cargar perfil y pedidos en paralelo una vez que sabemos el usuario
+        const [profileRes, ordersRes] = await Promise.all([
+          db.getProfile(userId),
+          db.getOrders(userId) // Optimización: Traer solo pedidos del usuario inicialmente
+        ]);
+
+        if (profileRes.data) {
+          const profile = profileRes.data;
           const user: User = {
             id: profile.id, name: profile.name,
             phone: profile.phone || '', email: profile.email || '',
@@ -629,10 +631,26 @@ export const useStore = create<AppState>((set, get) => ({
           };
           set({ user });
           saveActiveSession(user);
+
+          // Si es admin/vendedor, cargar TODOS los pedidos en segundo plano
+          if (user.role === 'admin' || user.role === 'vendor') {
+            db.getOrders().then(allOrdersRes => {
+              if (allOrdersRes.data) {
+                const mapped = allOrdersRes.data.map(dbToOrder);
+                set({ orders: mapped });
+                saveStoredOrders(mapped);
+              }
+            });
+          } else if (ordersRes.data) {
+            // Si es cliente, solo sus pedidos
+            const mapped = ordersRes.data.map(dbToOrder);
+            set({ orders: mapped });
+            saveStoredOrders(mapped);
+          }
         }
       }
 
-      // Real-time subscriptions
+      // 4. Suscripciones en tiempo real (Background)
       db.subscribeToProducts(() => {
         db.getProducts().then(({ data }) => {
           if (data) {
@@ -644,13 +662,21 @@ export const useStore = create<AppState>((set, get) => ({
       });
 
       db.subscribeToOrders(() => {
-        db.getOrders().then(({ data }) => {
-          if (data) {
-            const mapped = data.map(dbToOrder);
-            set({ orders: mapped });
-            saveStoredOrders(mapped);
-          }
-        });
+        // Al recibir actualización, refrescar según rol
+        const currentUser = get().user;
+        if (currentUser) {
+           const fetchPromise = (currentUser.role === 'admin' || currentUser.role === 'vendor')
+             ? db.getOrders()
+             : db.getOrders(currentUser.id);
+             
+           fetchPromise.then(({ data }) => {
+            if (data) {
+              const mapped = data.map(dbToOrder);
+              set({ orders: mapped });
+              saveStoredOrders(mapped);
+            }
+          });
+        }
       });
 
     } catch (e) {
