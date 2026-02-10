@@ -20,8 +20,16 @@ const ProfileView = lazy(() => import('./components/ProfileView').then(m => ({ d
 function LoadingFallback() {
   return (
     <div className="flex flex-col items-center justify-center py-20 min-h-[50vh]">
-      <div className="animate-spin text-4xl mb-4 text-emerald-500">🔄</div>
+      <div className="w-48 h-1.5 bg-gray-800 rounded-full overflow-hidden mb-3 border border-gray-800">
+        <div className="h-full bg-emerald-500 rounded-full animate-[loading_1s_ease-in-out_infinite]" style={{ width: '50%' }} />
+      </div>
       <p className="text-gray-500 text-sm animate-pulse">Cargando...</p>
+      <style>{`
+        @keyframes loading {
+          0% { transform: translateX(-100%); }
+          100% { transform: translateX(200%); }
+        }
+      `}</style>
     </div>
   );
 }
@@ -121,7 +129,9 @@ export default function App() {
       <main className="pb-20 min-h-screen">
         {isLoading ? (
           <div className="flex flex-col items-center justify-center py-20 min-h-[50vh]">
-            <div className="animate-spin text-4xl mb-4 text-emerald-500">🔄</div>
+            <div className="w-48 h-1.5 bg-gray-800 rounded-full overflow-hidden mb-3 border border-gray-800">
+              <div className="h-full bg-emerald-500 rounded-full animate-[loading_1s_ease-in-out_infinite]" style={{ width: '50%' }} />
+            </div>
             <p className="text-gray-500 text-sm animate-pulse">Cargando datos...</p>
           </div>
         ) : (
